@@ -23,6 +23,7 @@ class WikiLinkScanner(BaseLinkScanner):
                 (?:\#(?P<wiki_anchor>[^\|\]]+)?)?
                 (?:\|(?P<wiki_text>[^\]]+)?)?
             \]\]
+            (\{\:?(?P<wiki_style>.+?)\})?
             '''
 
     def match(self, match: Match) -> bool:
@@ -35,7 +36,8 @@ class WikiLinkScanner(BaseLinkScanner):
         image = groups.get('wiki_is_image') or ''
         link = groups.get('wiki_link') or ''
         anchor = groups.get('wiki_anchor') or ''
-        text = groups.get('wiki_text') or link or anchor
+        text = groups.get('wiki_text') or ''
+        style = groups.get('wiki_style') or ''
 
         if not (link or text or anchor):
             raise BrokenLink(f"Could not extract required field `wiki_link` from {match.group(0)}")
@@ -48,8 +50,10 @@ class WikiLinkScanner(BaseLinkScanner):
             image=image,
             text=text,
             target=link,
-            title=text,
-            anchor=anchor
+            title='',
+            anchor=anchor,
+            style=style,
+            icon=''
         )
 
     def _slugify(self, link: str) -> str:

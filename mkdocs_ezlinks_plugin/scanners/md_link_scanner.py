@@ -35,6 +35,7 @@ class MdLinkScanner(BaseLinkScanner):
                     (?:\ \"(?P<md_title>[^\"\)]*)\")?
                 )
             \)
+            (\{\:?(?P<md_style>.+?)\})?
             '''
 
     def match(self, match: Match) -> bool:
@@ -47,5 +48,7 @@ class MdLinkScanner(BaseLinkScanner):
             text=groups.get('md_text') or '',
             target=groups.get('md_filename') or '',
             title=groups.get('md_title') or '',
-            anchor=groups.get('md_anchor') or ''
+            anchor=groups.get('md_anchor') or '',
+            style=groups.get('md_style') or '',
+            icon=''
         )

@@ -17,6 +17,7 @@ LOGGER.addFilter(warning_filter)
 class EzLinksPlugin(mkdocs.plugins.BasePlugin):
     config_scheme = (
         ('wikilinks',  mkdocs.config.config_options.Type(bool, default=True)),
+        ('wiki_html_class',  mkdocs.config.config_options.Type(str, default=None)),
         ('warn_ambiguities', mkdocs.config.config_options.Type(bool, default=False))
     )
 
@@ -50,4 +51,4 @@ class EzLinksPlugin(mkdocs.plugins.BasePlugin):
         self.init(config)
 
     def on_page_markdown(self, markdown, page, config, **kwargs):
-        return self.replacer.replace(page.file.src_path, markdown)
+        return self.replacer.replace(page.file.src_path, markdown, config)

@@ -2,6 +2,8 @@ import os
 import re
 from typing import Match
 
+from mkdocs.utils import meta as meta_util, get_markdown_title
+
 from .types import EzLinksOptions, BrokenLink
 from .scanners.base_link_scanner import BaseLinkScanner
 from .file_mapper import FileMapper
@@ -21,12 +23,24 @@ class EzLinksReplacer:
         self.options = options
         self.scanners = []
         self.logger = logger
+        self.config = []
+
+    def get_meta(self, path):
+        try:
+            with open(path, 'r', encoding='utf-8-sig', errors='strict') as f:
+                source = f.read()
+                meta = meta_util.get_data(source)
+                return meta[1] if meta else None
+        except OSError as e:
+            print(e)
+            return None
 
     def add_scanner(self, scanner: BaseLinkScanner) -> None:
         self.scanners.append(scanner)
 
-    def replace(self, path: str, markdown: str) -> str:
+    def replace(self, path: str, markdown: str, config) -> str:
         self.path = path
+        self.config = config
 
         # Multi-Pattern search pattern, to capture  all link types at once
         return re.sub(self.regex, self._do_replace, markdown)
@@ -75,9 +89,28 @@ class EzLinksReplacer:
                         if not self.use_directory_urls:
                             search_result = search_result + '.md' if '.' not in search_result else search_result
 
-                        if not search_result:
+                        if search_result:
+                            path = os.path.join(self.config['docs_dir'], link.target)
+                            meta = self.get_meta(search_result)
+                            if meta:
+                                if not link.text and meta.get('title'):
+                                    link.text = meta.get('title')
+                                if 'icon-only' in link.style:
+                                    link.title = meta.get('title')
+                                elif not link.title and meta.get('summary'):
+                                    link.title = meta.get('summary')
+                                if meta.get('icon'):
+                                    link.icon = meta.get('icon').replace('/', '-')
+                            else:
+                                link.text = link.target
+                        else:
+                            link.src_not_found = True
                             raise BrokenLink(f"'{link.target}' not found.")
+
                         link.target = search_result
+
+                    if self.options.wiki_html_class:
+                        link.class_name = self.options.wiki_html_class
 
                     link.target = os.path.relpath(link.target, abs_from)
                     return link.render()

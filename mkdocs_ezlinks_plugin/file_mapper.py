@@ -6,7 +6,6 @@ import mkdocs
 
 from .types import EzLinksOptions
 
-
 class FileMapper:
     def __init__(
             self,
