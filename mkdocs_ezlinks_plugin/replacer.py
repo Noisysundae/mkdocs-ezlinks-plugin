@@ -98,7 +98,10 @@ class EzLinksReplacer:
                                 if 'icon-only' in link.style:
                                     link.title = meta.get('title')
                                 elif not link.title and meta.get('summary'):
-                                    link.title = meta.get('summary')
+                                    if meta.get('alias'):
+                                        link.title = meta.get('alias') + ': ' + meta.get('summary')
+                                    else:
+                                        link.title = meta.get('summary')
                                 if meta.get('icon'):
                                     link.icon = meta.get('icon').replace('/', '-')
                             else:
