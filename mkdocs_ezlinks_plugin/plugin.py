@@ -8,6 +8,7 @@ from .file_mapper import FileMapper
 from .replacer import EzLinksReplacer
 from .scanners.md_link_scanner import MdLinkScanner
 from .scanners.wiki_link_scanner import WikiLinkScanner
+from .scanners.reference_link_scanner import ReferenceLinkScanner
 from .types import EzLinksOptions
 
 LOGGER = logging.getLogger(f"mkdocs.plugins.{__name__}")
@@ -18,7 +19,8 @@ class EzLinksPlugin(mkdocs.plugins.BasePlugin):
     config_scheme = (
         ('wikilinks',  mkdocs.config.config_options.Type(bool, default=True)),
         ('wiki_html_class',  mkdocs.config.config_options.Type(str, default=None)),
-        ('warn_ambiguities', mkdocs.config.config_options.Type(bool, default=False))
+        ('warn_ambiguities', mkdocs.config.config_options.Type(bool, default=False)),
+        ('reference_links', mkdocs.config.config_options.Type(bool, default=False))
     )
 
     def init(self, config):
@@ -33,6 +35,9 @@ class EzLinksPlugin(mkdocs.plugins.BasePlugin):
         self.replacer.add_scanner(MdLinkScanner())
         if self.config['wikilinks']:
             self.replacer.add_scanner(WikiLinkScanner())
+        
+        if self.config['reference_links']:
+            self.replacer.add_scanner(ReferenceLinkScanner())
 
         # Compile the regex once
         self.replacer.compile()

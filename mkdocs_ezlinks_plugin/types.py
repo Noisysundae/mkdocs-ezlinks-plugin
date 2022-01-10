@@ -33,3 +33,4 @@ class EzLinksOptions:
     wikilinks: bool
     wiki_html_class: str
     warn_ambiguities: bool
+    reference_links: bool
