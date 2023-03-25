@@ -1,13 +1,11 @@
 import os
 import re
 from typing import Match
-
 from mkdocs.utils import meta as meta_util, get_markdown_title
-
+from urllib.parse import quote
 from .types import EzLinksOptions, BrokenLink
 from .scanners.base_link_scanner import BaseLinkScanner
 from .file_mapper import FileMapper
-
 
 class EzLinksReplacer:
     def __init__(
@@ -67,7 +65,6 @@ class EzLinksReplacer:
 
     def _do_replace(self, match: Match) -> str:
         abs_from = os.path.dirname(os.path.join(self.root, self.path))
-
         try:
             for scanner in self.scanners:
                 if scanner.match(match):
@@ -111,11 +108,10 @@ class EzLinksReplacer:
                             raise BrokenLink(f"'{link.target}' not found.")
 
                         link.target = search_result
-
                     if self.options.wiki_html_class:
                         link.class_name = self.options.wiki_html_class
 
-                    link.target = os.path.relpath(link.target, abs_from)
+                    link.target = quote(os.path.relpath(link.target, abs_from))
                     return link.render()
         except BrokenLink as ex:
             # Log these out as Debug messages, as the regular mkdocs
